@@ -3,32 +3,26 @@ def ex(param){
 }
 
 pipeline {
-    agent any
+    agent none
     parameters {
         string(name: 'BRANCH_NAME', defaultValue: 'develop', description: 'Select branch to deploy')
     }
 
     stages {
-        stage('Validation') {
+        stage('Back-end') {
+            agent {
+                docker { image 'maven:3.8.1-adoptopenjdk-11' }
+            }
             steps {
-                script {
-                    if ("${params.BRANCH_NAME}" == "release") {ex("BRANCH_NAME can not be release")}
-                    if ("${params.BRANCH_NAME}" == "") {ex("BRANCH_NAME can not be empty")}
-                }
+                sh 'mvn --version'
             }
         }
-        stage('Echo') {
-            steps {
-                echo 'Test git pull'
-                sh 'ls -al'
-                echo 'Install JDK 11'
-                sh 'sudo apt-get install openjdk-11-jdk'
+        stage('Front-end') {
+            agent {
+                docker { image 'node:16.13.1-alpine' }
             }
-        }
-        stage('Deploy') {
             steps {
-                echo 'Deploying....'
-                echo 'Deploy successful!'
+                sh 'node --version'
             }
         }
     }
